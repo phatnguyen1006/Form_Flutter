@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
-import 'IForm.dart';
+import 'package:flutter/services.dart';
+import 'package:datetime_picker_formfield/datetime_picker_formfield.dart';
+import 'package:intl/intl.dart';
+import 'Models/IForm.dart';
 import 'json/province.dart';
 import 'Components/custom_dropdown.dart';
 
@@ -12,6 +15,7 @@ class FormInfomation extends StatefulWidget {
 
 class _FormInfomationState extends State<FormInfomation> {
   var _formData = IForm(
+    dob: DateTime.now(),
     username: '',
     email: '',
     gender: '',
@@ -25,9 +29,10 @@ class _FormInfomationState extends State<FormInfomation> {
     province: "",
     ward: "",
   );
-  final _nameField = FocusNode();
-  final _emailField = FocusNode();
+
   final _formKey = GlobalKey<FormState>();
+  final _nameFocus = FocusNode();
+  final _emailFocus = FocusNode();
   final _submitButtonFocus = FocusNode();
   // final _emailFocus = FocusNode();
   final _genderFocus = FocusNode();
@@ -41,6 +46,7 @@ class _FormInfomationState extends State<FormInfomation> {
   // radio
   bool _value = false;
   int val = -1;
+  DateTime date = DateTime.now();
 
   // var
   List<bool> checkboxArr = [false, false, false];
@@ -51,6 +57,62 @@ class _FormInfomationState extends State<FormInfomation> {
   late String district;
 
   int chooseGender = 2;
+
+  int i = 0;
+  Color bg = Colors.white;
+
+  void changeBackground() {
+    List<Color> bgColor = [
+      Colors.cyanAccent,
+      Colors.red,
+      Colors.white,
+      Colors.blue,
+      Colors.grey
+    ];
+
+    setState(() {
+      bg = bgColor[i++];
+    });
+
+    if (i >= 3) {
+      i = 0;
+    }
+  }
+
+  _dismissDialog() {
+    Navigator.pop(context);
+  }
+
+  void _showMaterialDialog(result) {
+    showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: Text('Submit Successfully!!!'),
+            content: Text(result),
+            actions: <Widget>[
+              TextButton(
+                  onPressed: () {
+                    _dismissDialog();
+                  },
+                  child: Text('OK')),
+              // Text("${_formData.toString()}"),
+            ],
+          );
+        });
+  }
+
+  void _submitForm() {
+    bool validForm = _formKey.currentState!.validate();
+    if (!validForm) {
+      return;
+    } else {
+      _formKey.currentState!.save();
+      String _result =
+          "${_formData.username.toString()}\n${_formData.email.toString()}\n${_formData.phone.toString()}\n${_formData.dob.toString()}";
+      _showMaterialDialog(_result);
+    }
+  }
 
   @override
   void initState() {
@@ -78,8 +140,8 @@ class _FormInfomationState extends State<FormInfomation> {
   @override
   void dispose() {
     // TODO: implement dispose
-    _nameField.dispose();
-    _emailField.dispose();
+    _nameFocus.dispose();
+    _emailFocus.dispose();
     _submitButtonFocus.dispose();
     // _emailFocus.dispose();
     _genderFocus.dispose();
@@ -101,80 +163,23 @@ class _FormInfomationState extends State<FormInfomation> {
 
   Widget spacer() {
     return SizedBox(
-      height: 20,
+      height: 30,
     );
   }
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 30, vertical: 30),
+      color: bg,
+      padding: EdgeInsets.symmetric(horizontal: 30, vertical: 35),
       child: Form(
+        key: _formKey,
         child: ListView(
           children: [
-            TextFormField(
-              focusNode: _nameField,
-              keyboardType: TextInputType.name,
-              decoration: InputDecoration(
-                labelText: "Full Name",
-                labelStyle: TextStyle(color: Colors.black, fontSize: 20),
-                focusedBorder: OutlineInputBorder(
-                  borderSide: BorderSide(width: 2, color: Colors.black),
-                ),
-                border: OutlineInputBorder(
-                  borderSide: BorderSide(width: 2, color: Colors.grey),
-                ),
-              ),
-              cursorColor: Colors.black,
-              maxLines: 1,
-              validator: (value) {
-                if (value!.isEmpty) return 'Please fill KhoiNg name.';
-                return null; // Correct input
-              },
-              onFieldSubmitted: (_) {
-                FocusScope.of(context).requestFocus(_emailField);
-              },
-              onSaved: (value) {
-                _formData = IForm(
-                  username: value ?? "Khoi Ng",
-                  email: _formData.email,
-                );
-              },
-            ),
+            // textField
+
             spacer(),
-            TextFormField(
-              focusNode: _emailField,
-              keyboardType: TextInputType.emailAddress,
-              decoration: InputDecoration(
-                labelText: "Email",
-                labelStyle: TextStyle(color: Colors.black, fontSize: 20),
-                focusedBorder: OutlineInputBorder(
-                  borderSide: BorderSide(width: 2, color: Colors.black),
-                ),
-                border: OutlineInputBorder(
-                  borderSide: BorderSide(width: 2, color: Colors.grey),
-                ),
-              ),
-              cursorColor: Colors.black,
-              maxLines: 1,
-              validator: (value) {
-                if (value!.isEmpty)
-                  return "Please fill your email";
-                else if (!value.contains("\@"))
-                  return "Please fill correct email";
-                return null; // Correct input
-              },
-              onFieldSubmitted: (_) {
-                FocusScope.of(context).requestFocus();
-              },
-              onSaved: (value) {
-                _formData = IForm(
-                  username: _formData.username,
-                  email: value ?? "",
-                );
-              },
-            ),
-            spacer(),
+            // checkBox
             Container(
               padding: EdgeInsets.only(top: 20, bottom: 10),
               child: Text(
@@ -255,6 +260,14 @@ class _FormInfomationState extends State<FormInfomation> {
               ),
             ),
             spacer(),
+            // dropdownButton
+            Container(
+              padding: EdgeInsets.only(top: 20, bottom: 10),
+              child: Text(
+                "Where do you live?",
+                style: TextStyle(fontSize: 16),
+              ),
+            ),
             CustomDropdown(
               focus: _cityFocus,
               dropdownMenuItemList: data,
@@ -263,6 +276,7 @@ class _FormInfomationState extends State<FormInfomation> {
                   province = newValue!;
                   _setDistrict(newValue);
                   _formData = IForm(
+                    dob: date,
                     email: _formData.email,
                     username: _formData.username,
                     gender: _formData.gender,
@@ -290,6 +304,7 @@ class _FormInfomationState extends State<FormInfomation> {
                 setState(() {
                   district = newValue!;
                   _formData = IForm(
+                    dob: date,
                     email: _formData.email,
                     username: _formData.username,
                     gender: _formData.gender,
@@ -353,7 +368,187 @@ class _FormInfomationState extends State<FormInfomation> {
                   ),
                 ),
               ],
-            )
+            ),
+            spacer(),
+            Container(
+              padding: EdgeInsets.only(top: 10),
+              child: TextFormField(
+                focusNode: _nameFocus,
+                keyboardType: TextInputType.name,
+                autofocus: true,
+                decoration: InputDecoration(
+                  labelText: "Full Name",
+                  labelStyle: TextStyle(color: Colors.black, fontSize: 20),
+                  hintText: "Ex: Nguyen Ngoc Khoi",
+                  icon: Icon(Icons.person),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(width: 2, color: Colors.black),
+                  ),
+                  border: OutlineInputBorder(
+                    borderSide: BorderSide(width: 2, color: Colors.grey),
+                  ),
+                ),
+                cursorColor: Colors.black,
+                maxLines: 1,
+                validator: (value) {
+                  if (value!.isEmpty)
+                    return 'Please fill Nguyễn Ngọc Khôi name.';
+                  return null; // Correct input
+                },
+                onFieldSubmitted: (_) {
+                  FocusScope.of(context).requestFocus(_emailFocus);
+                },
+                onSaved: (value) {
+                  _formData = IForm(
+                    dob: date,
+                    username: value ?? "Khoi Ng",
+                    email: _formData.email,
+                  );
+                },
+              ),
+            ),
+            spacer(),
+            TextFormField(
+              focusNode: _emailFocus,
+              keyboardType: TextInputType.emailAddress,
+              decoration: InputDecoration(
+                labelText: "Email",
+                hintText: "Ex: NguyenNgocKhoi@gmail.com",
+                icon: Icon(Icons.email_outlined),
+                labelStyle: TextStyle(color: Colors.black, fontSize: 20),
+                focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(width: 2, color: Colors.black),
+                ),
+                border: OutlineInputBorder(
+                  borderSide: BorderSide(width: 2, color: Colors.grey),
+                ),
+              ),
+              cursorColor: Colors.black,
+              maxLines: 1,
+              validator: (value) {
+                if (value!.isEmpty)
+                  return "Please fill your email";
+                else if (!value.contains("\@"))
+                  return "Please fill correct email";
+                return null; // Correct input
+              },
+              onFieldSubmitted: (_) {
+                FocusScope.of(context).requestFocus();
+              },
+              onSaved: (value) {
+                _formData = IForm(
+                  dob: date,
+                  username: _formData.username,
+                  email: value ?? "",
+                );
+              },
+            ),
+            spacer(),
+            TextFormField(
+              focusNode: _phoneFocus,
+              keyboardType: TextInputType.phone,
+              // keyboardType: TextInputType.number,
+              decoration: InputDecoration(
+                labelText: "Phone",
+                labelStyle: TextStyle(color: Colors.black, fontSize: 20),
+                focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(width: 2, color: Colors.black),
+                ),
+                border: OutlineInputBorder(
+                  borderSide: BorderSide(width: 2, color: Colors.grey),
+                ),
+              ),
+              cursorColor: Colors.black,
+              // InputFormantters
+              inputFormatters: [
+                LengthLimitingTextInputFormatter(11),
+                FilteringTextInputFormatter.digitsOnly,
+                FilteringTextInputFormatter.deny("84"),
+                // FilteringTextInputFormatter.allow("84"),
+              ],
+              maxLines: 1,
+              validator: (value) {
+                if (value!.isEmpty) return "Please fill your phone number";
+                return null; // Correct input
+              },
+              onFieldSubmitted: (_) {
+                FocusScope.of(context).requestFocus();
+              },
+              onSaved: (value) {
+                _formData = IForm(
+                  dob: date,
+                  username: _formData.username,
+                  phone: value ?? "",
+                  email: _formData.email,
+                );
+              },
+              // Input Controller
+              onChanged: (value) {
+                changeBackground();
+              },
+            ),
+            spacer(),
+            DateTimeField(
+              format: DateFormat("dd-MM-yyyy"),
+              onShowPicker: (context, currentValue) {
+                return showDatePicker(
+                    context: context,
+                    firstDate: DateTime(1900),
+                    initialDate: currentValue ?? DateTime.now(),
+                    lastDate: DateTime(2100));
+              },
+              decoration: InputDecoration(
+                labelText: "Date of Birth",
+                labelStyle: TextStyle(color: Colors.black, fontSize: 20),
+                focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(width: 2, color: Colors.black),
+                ),
+                border: OutlineInputBorder(
+                  borderSide: BorderSide(width: 2, color: Colors.grey),
+                ),
+              ),
+              onSaved: (newDate) {
+                _formData = IForm(
+                  dob: newDate!,
+                  email: _formData.email,
+                  username: _formData.username,
+                  gender: _formData.gender,
+                  phone: _formData.phone,
+                  address: _formData.address,
+                  city: _formData.city,
+                  district: _formData.district,
+                  country: 'Việt Nam',
+                  addressName: "",
+                  postcode: "",
+                  province: _formData.province,
+                  ward: _formData.ward,
+                );
+              },
+            ),
+            spacer(),
+            Container(
+              width: MediaQuery.of(context).size.width,
+              height: 50,
+              child: ElevatedButton(
+                onPressed: () {
+                  _submitForm();
+                  // Navigator.of(context).push(MaterialPageRoute(
+                  //     builder: (context) => RegisterAuthScreen()));
+                },
+                focusNode: _submitButtonFocus,
+                style: ButtonStyle(
+                  backgroundColor:
+                      MaterialStateProperty.all<Color>(Colors.black),
+                  elevation: MaterialStateProperty.all<double>(12.0),
+                ),
+                child: Text("SUBMIT",
+                    style: TextStyle(
+                      color: Colors.lightBlue,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 13 * 1.55,
+                    )),
+              ),
+            ),
           ],
         ),
       ),

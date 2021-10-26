@@ -1,4 +1,7 @@
+import 'package:intl/intl.dart';
+
 class IForm {
+  final DateTime dob;
   final String username;
   final String email;
   final String gender;
@@ -16,6 +19,7 @@ class IForm {
   IForm({
     required this.username,
     required this.email,
+    required this.dob,
     this.gender = "",
     this.phone = "",
     this.address = "",
