@@ -18,7 +18,7 @@ class _FormDemoState extends State<FormDemo> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Color(0xff4db8ff),
-        title: const Text("Form Demo - Group "),
+        title: const Text("Form Demo"),
       ),
       body: FormInfomation(),
     );

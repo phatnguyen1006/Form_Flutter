@@ -49,7 +49,7 @@ class _FormInfomationState extends State<FormInfomation> {
   DateTime date = DateTime.now();
 
   // var
-  List<bool> checkboxArr = [false, false, false];
+  List<bool> checkboxArr = [false, false, false, false];
   List<String> data = [];
   List<String> districtsData = [];
   late String dropdownValue;
@@ -260,6 +260,27 @@ class _FormInfomationState extends State<FormInfomation> {
               ),
             ),
             spacer(),
+            Container(
+              height: MediaQuery.of(context).size.height / 20,
+              alignment: Alignment.centerLeft,
+              // padding: EdgeInsets.only(bottom: 20, top: 10),
+              child: Row(
+                children: [
+                  Switch(
+                      activeColor: Colors.green,
+                      value: checkboxArr[3],
+                      onChanged: (value) {
+                        setState(() {
+                          checkboxArr[3] = !checkboxArr[3];
+                        });
+                      }),
+                  Expanded(
+                    child: const Text('Do you like the animal?'),
+                  ),
+                ],
+              ),
+            ),
+            spacer(),
             // dropdownButton
             Container(
               padding: EdgeInsets.only(top: 20, bottom: 10),
@@ -337,6 +358,7 @@ class _FormInfomationState extends State<FormInfomation> {
               children: [
                 Theme(
                   data: ThemeData(unselectedWidgetColor: Colors.red),
+                  // Radio Button
                   child: ListTile(
                     title: Text("Male"),
                     leading: Radio(
@@ -355,6 +377,7 @@ class _FormInfomationState extends State<FormInfomation> {
                   data: ThemeData(unselectedWidgetColor: Colors.red),
                   child: ListTile(
                     title: Text("Female"),
+                    // Radio Button
                     leading: Radio(
                       value: 2,
                       groupValue: val,

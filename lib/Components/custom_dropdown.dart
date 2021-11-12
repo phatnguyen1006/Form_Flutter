@@ -28,6 +28,7 @@ class CustomDropdown<String> extends StatelessWidget {
             ),
             color: isEnabled ? Colors.white : Colors.grey.withAlpha(100)),
         child: DropdownButtonHideUnderline(
+          // DropdownButton
           child: DropdownButton(
             focusNode: focus,
             isExpanded: true,
